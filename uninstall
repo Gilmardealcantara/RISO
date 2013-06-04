@@ -1,0 +1,59 @@
+#!/bin/bash
+
+job_cli="avahi-utils rtorrent screen ntfsprogs ssh git-core"
+job_ser="avahi-utils avahi-daemon bittorrent rtorrent screen ntfsprogs grub2 ssh coreutils mkisofs genisoimage findutils bash passwd sed squashfs-tools casper rsync mount eject libdebian-installer4 os-prober ubiquity user-setup discover1 discover laptop-detect syslinux xterm util-linux xresprobe cdrecord git-core"
+
+menu() {
+    apt-get install -y dialog
+            opcao=$(zenity --width=400 --height=400 --text="Desinstalação do RISO" --list --checklist --column " " --column "Opcoes" TRUE RISOS TRUE RISO)
+  # De acordo com a opção escolhida, executa funcoes
+	case $opcao in
+		"RISOS") desinstala_risos;;
+		"RISO") desinstala_riso;;
+		"RISOS|RISO") desinstala_riso; desinstala_risos;;
+	esac
+
+}
+
+desinstala_riso() {
+    echo "Removendo Cliente (RISO)..."
+    
+    apt-get remove -y $job_cli
+    
+    echo "Removendo árvore de diretórios..."
+    rm -rf /usr/riso 2> /dev/null
+    
+    echo "Removendo arquivo de inicialização..."
+    rm -fr /usr/bin/riso 2> /dev/null
+    
+    echo "Sistema desinstalado com sucesso."
+}
+
+desinstala_risos() {
+    echo "Removendo Servidor (RISOS)..."
+    
+    echo "Removendo dependências..."
+    apt-get remove -y $job_ser
+    
+    echo "Removendo árvore de diretórios..."
+    rm -fr -p /usr/riso 2> /dev/null
+
+    echo "Removendo arquivo de inicialização..."
+    rm -fr /usr/bin/risos 2> /dev/null
+
+    echo "Removendo chaves rsa..."    
+    rm -fr /root/.ssh/id_rsa* 2> /dev/null
+  
+    echo "Removendo riso service"
+    rm -fr /etc/avahi/services/riso.service 2> /dev/null	
+
+	#faltou o trem do remastersys
+}
+
+#Verifica se usuário é o root antes de executar.
+USER=`id -u`
+if [ $USER == '0' ]; then
+    menu
+else
+    echo "Só o root pode fazer isso, jovenzinho!"
+fi
